@@ -1,6 +1,5 @@
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 
-// Define types
 export type CartItem = {
   id: string;
   title: string;
@@ -20,15 +19,12 @@ interface CartContextType {
   setAppointment: React.Dispatch<React.SetStateAction<Appointment | null>>;
 }
 
-// Create context with default value
 export const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Provider props
 interface CartProviderProps {
   children: ReactNode;
 }
 
-// Provider component
 export const CartProvider = ({ children }: CartProviderProps) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
@@ -44,7 +40,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
   );
 };
 
-// Custom hook (optional, recommended)
 export const useCart = (): CartContextType => {
   const context = useContext(CartContext);
   if (!context) {
@@ -52,4 +47,3 @@ export const useCart = (): CartContextType => {
   }
   return context;
 };
-
