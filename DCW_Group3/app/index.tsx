@@ -1,24 +1,41 @@
+// app/index.tsx
+import { services } from '@/constants/services';
+import { useCart } from '@/context/CartContext';
 import useLocation from '@/hooks/useLocations';
-import { useNavigation } from 'expo-router';
-import React from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
-import { services } from '../../constants/services';
-import { useCart } from '../../context/CartContext';
 
 
 const storeImages = [
-  require('../../assets/images/logo1.png'),
-  require('../../assets/images/logo2.png'),
+  require('../assets/images/logo1.png'),
+  require('../assets/images/logo2.png'),
 ];
 
 export default function HomeScreen() {
-  const navigation = useNavigation();
-  const { addToCart } = useCart();
+  const router = useRouter();
+  const { addToCart, cart } = useCart();
   const location = useLocation();
+  const [badge, setBadge] = useState(0);
+  /// return data from cart
+  const params = useLocalSearchParams();
+
+  useEffect(() => {
+    if (params.submitted === 'true') {
+      Alert.alert('Order Submitted', 'Your car wash appointment has been placed successfully!');
+    }
+  }, [params]);
+
+
+//set a number in hte badge when product added to cart
+  useEffect(() => {
+    setBadge(cart.length);
+  }, [cart]);
 
   const handleSelectService = (item: any) => {
     addToCart(item);
+    Alert.alert('Service Added', `${item.title} added to cart.`);
   };
 
   return (
@@ -30,10 +47,17 @@ export default function HomeScreen() {
             ? `Lat: ${location.coords.latitude.toFixed(2)}, Lon: ${location.coords.longitude.toFixed(2)}`
             : 'Fetching location...'}
         </Text>
-        <Image
-          source={{ uri: 'https://i.pravatar.cc/100' }}
-          style={styles.avatar}
-        />
+        <View>
+          <Image
+            source={{ uri: 'https://i.pravatar.cc/100' }}
+            style={styles.avatar}
+          />
+          {badge > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{badge}</Text>
+            </View>
+          )}
+        </View>
       </View>
 
       {/* Store logo carousel */}
@@ -75,9 +99,17 @@ export default function HomeScreen() {
         </TouchableOpacity>
       ))}
 
-      {/* Navigate to detail screen */}
-      <TouchableOpacity style={styles.detailButton} onPress={() => navigation.navigate('Details' as never)}>
-        <Text style={styles.detailButtonText}>Go to Detailing Options</Text>
+      {/* Action buttons */}
+      <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/details')}>
+        <Text style={styles.actionText}>Select Car Detailing Services</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/appointment')}>
+        <Text style={styles.actionText}>Book an Appointment</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/cart')}>
+        <Text style={styles.actionText}>Pay and Place Order</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -102,6 +134,22 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+  },
+  badge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: 'red',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   logo: {
     width: 300,
@@ -132,14 +180,14 @@ const styles = StyleSheet.create({
   packageTitle: {
     fontWeight: 'bold',
   },
-  detailButton: {
-    marginTop: 30,
+  actionButton: {
+    marginTop: 15,
     padding: 15,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#28a745',
     borderRadius: 10,
     alignItems: 'center',
   },
-  detailButtonText: {
+  actionText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
